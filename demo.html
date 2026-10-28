@@ -1,0 +1,48 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yunze Kovan demo</title>
+<style>
+  body { font: 16px system-ui; max-width: 460px; margin: 2rem auto; padding: 0 1rem }
+  #role { padding: .1rem .6rem; border-radius: 99px; color: #fff }
+  .l { background: #16a34a } .f { background: #64748b }
+  button { font: inherit; padding: .4rem .8rem; margin: .2rem 0 }
+  pre { background: #f1f5f9; padding: .6rem; border-radius: 8px; max-height: 160px; overflow: auto }
+</style>
+<h2>Yunze Kovan demo</h2>
+<p>Open this page in a few tabs, then close the leader.</p>
+<p>tab <b id="me"></b> · <span id="role"></span> · <b id="n"></b> open</p>
+<p>counter: <b id="cnt">0</b> <button id="inc">+1</button></p>
+<p>clock (only the leader writes it): <b id="clock">-</b></p>
+<button id="ping">ask the leader</button>
+<pre id="log"></pre>
+<script src="kovan.umd.js"></script>
+<script>
+  const $ = (s) => document.getElementById(s);
+  const hive = Kovan.createHive('demo', { initial: { count: 0 } });
+  const log = (t) => ($('log').textContent = t + '\n' + $('log').textContent);
+
+  hive.onLeader(() => {
+    log('became leader');
+    const t = setInterval(() => hive.set({ time: new Date().toLocaleTimeString() }), 1000);
+    return () => { clearInterval(t); log('lost leadership'); };
+  });
+  hive.handle('whoami', () => 'answered by: ' + hive.id.slice(-4));
+
+  function render() {
+    const s = hive.get();
+    $('me').textContent = hive.id.slice(-4);
+    $('role').textContent = hive.isLeader ? 'leader' : 'follower';
+    $('role').className = hive.isLeader ? 'l' : 'f';
+    $('n').textContent = hive.peers().length;
+    $('cnt').textContent = s.count;
+    $('clock').textContent = s.time || '-';
+  }
+  hive.subscribe(render);
+  hive.on('leader', render);
+  setInterval(render, 500);
+  render();
+
+  $('inc').onclick = () => hive.set((s) => ({ count: s.count + 1 }));
+  $('ping').onclick = () => hive.request('whoami').then(log, (e) => log(e.message));
+</script>

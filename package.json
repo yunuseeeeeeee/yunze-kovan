@@ -1,0 +1,25 @@
+{
+  "name": "yunze-kovan",
+  "version": "0.1.0",
+  "description": "Leader election, shared state and RPC across browser tabs. No dependencies.",
+  "license": "MIT",
+  "author": "Yunze",
+  "keywords": ["broadcastchannel", "leader-election", "cross-tab", "multi-tab", "shared-state"],
+  "main": "kovan.umd.js",
+  "module": "index.mjs",
+  "types": "kovan.d.ts",
+  "unpkg": "kovan.umd.js",
+  "exports": {
+    ".": {
+      "types": "./kovan.d.ts",
+      "import": "./index.mjs",
+      "require": "./kovan.umd.js"
+    }
+  },
+  "files": ["index.mjs", "kovan.umd.js", "kovan.d.ts"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "node build.js",
+    "test": "node test.js"
+  }
+}
